@@ -1,0 +1,125 @@
+#####    HW1     ######
+
+##### Question 1 ######
+
+# 与えられた文字列のAnagramを辞書ファイルから探して「見つかったアナグラム全部」を答えるプログラムを作る
+
+import bisect,time
+
+def search_anagram(searchlist, dictionary):
+  # sort given dictionary
+  new_dictionary = []
+  for word in dictionary:
+    new_dictionary.append((''.join(sorted(word)), word))
+  new_dictionary.sort()
+  sorted_dictionary = [i[0] for i in new_dictionary]
+  original_dictionary = [i[1] for i in new_dictionary]
+
+  # sort given list
+  total_anagram =[]
+  for i in range(len(searchlist)):
+    searchlist[i] =  ''.join(sorted(searchlist[i]))
+    search_str = searchlist[i]
+    top_point = bisect.bisect_left(sorted_dictionary,search_str)
+    end_point = bisect.bisect_left(sorted_dictionary, search_str[:-1] + chr(ord(search_str[-1]) + 1))
+    ana_list = original_dictionary[top_point:end_point]
+  # select
+    anagram = []
+    for j in ana_list:
+      if len(j) == len(search_str):
+        anagram.append(j)
+    total_anagram.append(anagram)
+  return total_anagram
+
+start_t = time.time()
+f = open("words.txt", "r")
+dictionary = f.readlines()
+f.close()
+for i in range(len(dictionary)):
+  dictionary[i]=dictionary[i].rstrip()
+
+search_list = ['ab','abnadno','cdar'] #test case
+print(search_anagram(search_list, dictionary)) #[['ab', 'ba'], ['abandon'], ['card']]
+final_t = time.time()
+print('time:',final_t - start_t) #time: 0.13594651222229004
+##### Question 2 ######
+
+# 与えられた文字列の全ての文字を使わなくても良いように関数をアップグレードする
+# 入力：small.txt , medium.txt, large.txt
+# 出力：各単語について「最大のスコアを持つアナグラム」を列挙したファイル
+
+import time
+from collections import Counter
+def open_files(str):
+  f = open(str, "r")
+  dictionary = f.readlines()
+  f.close()
+  for i in range(len(dictionary)):
+    dictionary[i] = dictionary[i].rstrip()
+  return dictionary
+def choose_single(list):
+  for sub in list:
+    return sub
+SCORES = [1, 3, 2, 2, 1, 3, 3, 1, 1, 4, 4, 2, 2, 1, 1, 3, 4, 1, 1, 1, 2, 3, 3, 4, 3, 4]
+def calculate_score(word):
+    score = 0
+    for character in list(word):
+        score += SCORES[ord(character) - ord('a')]
+    return score
+
+def search_anagram(searchlist, dictionary):
+  c = searchlist
+  d = dictionary
+  c = list(c[0])
+  cc = Counter(c)
+  key_cc = sorted(list(cc.keys()))
+  key_cd = []
+  for i in d:
+    cd = Counter(i)
+    single = sorted(list(cd.keys()))
+    key_cd.append((single, cd, i))
+  issublist = []
+  for j in key_cd:
+    if set(j[0]).issubset(set(key_cc)):
+      issublist.append(j)
+  total = []
+  for subcounter in issublist:
+    result = []
+    alphabet = choose_single(cc)
+    if subcounter[1][alphabet] < cc[alphabet]:
+      result.append(subcounter)
+    elif subcounter[1][alphabet] == cc[alphabet]:
+      result.append(subcounter)
+    total.append(result)
+
+  anagram = []
+  for single_ana in total:
+    if single_ana != []:
+      anagram.append(single_ana[0][2])
+
+  return anagram
+
+def find_max(anagram):
+  total_score = []
+  for ana in anagram:
+    score = calculate_score(ana)
+    total_score.append(score)
+  for i in range(len(total_score)):
+    if total_score[i] == max(total_score):
+      maxvalue = [anagram[i] , total_score[i]]
+  return maxvalue
+
+def result_each_list (list):
+  total_anagram = search_anagram(list, dictionary)
+  maxanagram = find_max(total_anagram)
+  print('max score:', maxanagram)
+  return maxanagram
+
+start_t = time.time()
+dictionary = open_files('words.txt')
+small_list = open_files('small.txt')
+small_result = result_each_list(small_list)
+final_t = time.time()
+print('time:',final_t - start_t) #time:
+# with open('small_test.txt','w') as f:
+#   f.write('\n'.join(small_result))
