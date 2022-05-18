@@ -1,0 +1,71 @@
+
+# Question 1
+# 行列積を求めるプログラムを書いて、行列のサイズNと実行時間の関係を調べてみよう
+# プログラムの入力はサイズN
+# N×Nの行列AとBを用意する（行列の中身は適当でOK）
+# C=ABを計算する（この部分の実行時間を測定する）
+# Nと実行時間の関係をグラフにする（計算量との関係は？）
+
+import numpy, time
+import matplotlib.pyplot as plt
+def get_execution_time(N):
+    result = []
+    for i in N:
+        n = int(i)
+        a = numpy.zeros((n, n))  # Matrix A
+        b = numpy.zeros((n, n))  # Matrix B
+        c = numpy.zeros((n, n))  # Matrix C
+        # Initialize the matrices to some values.
+        for i in range(n):
+            for j in range(n):
+                a[i, j] = i * n + j
+                b[i, j] = j * n + i
+                c[i, j] = 0
+        # print(a,b,c)
+        begin = time.time()
+
+        for i in range(len(a)):
+            # 遍历Y列
+            for j in range(len(b[0])):
+                # 遍历Y行
+                for k in range(len(b)):
+                    c[i][j] += a[i][k] * b[k][j]
+        end = time.time()
+        execution_time = end - begin
+        # print("time: %.6f sec" % execution_time)
+        total = 0
+        for i in range(n):
+            for j in range(n):
+                # print c[i, j]
+                total += c[i, j]
+        # Print out the sum of all values in C.
+        # This should be 450 for N=3, 3680 for N=4, and 18250 for N=5.
+        # print("sum: %.6f" % total)
+        result.append(execution_time)
+    return result
+# plot
+N = numpy.arange(100)
+execution_time = get_execution_time(N)
+plt.plot(N,execution_time)
+
+# Question 2
+# 木構造を使えばO(log N)、ハッシュテーブルを使えばほぼO(1)で検索・追加・削除を実現することができて、
+# これだけ見ればハッシュテーブルのほうがはるかに優れているように見える。
+# ところが、現実の大規模なデータベースでは、ハッシュテーブルではなく木構造が使われることが多い。その理由を考えよ。
+
+# 答え：
+# 1.ハッシュテーブルはメモリを使用過ぎる問題がある。
+# 2. 異なるキーが同じハッシュ値となる衝突が起きる可能性がある。
+
+
+# Question3
+# 次の操作をほぼO(1)で実現するデータ構造を考えよう
+# 与えられた<URL, Webページ>があるかないかを検索する
+# もしない場合、キャッシュ内で一番古い<URL, Webページ>を捨てて、かわりに与えられた<URL, Webページ>を追加する
+
+#　答え：
+# ハッシュテーブルは検索の速度が速いが、順序がない。リンクトリストは順序があるが、検索の速度が遅い。
+# この二つの構造を組み合わせて使えば、検索の速度が速く順序を管理できるLRUデータ構造を実現できる。
+
+
+
